@@ -1,25 +1,52 @@
 package tree
 
-type BinaryTree struct {
-	Root Node
+func (bt *BinaryTree) Search(number int) bool {
+	isFound := false
+
+	currentNode := bt.Root
+	for {
+		if number == currentNode.Value {
+			isFound = true
+			break
+		}
+
+		if number < currentNode.Value {
+			if isNodeNil(currentNode.LeftNode) {
+				break
+			}
+			currentNode = currentNode.LeftNode
+		}
+
+		if number > currentNode.Value {
+			if isNodeNil(currentNode.RightNode) {
+				break
+			}
+			currentNode = currentNode.RightNode
+		}
+	}
+
+	return isFound
 }
 
-type Node struct {
-	Value     int
-	LeftNode  *Node
-	RightNode *Node
+func isNodeNil(node *Node) bool {
+	return node == nil
 }
 
-type NodeBranchFunction func([]int, int) []int
+func NewBinaryTree(items []int) *BinaryTree {
+	binaryTree := &BinaryTree{
+		Root: &Node{},
+	}
 
-func NewBinaryTreeFromSlice(treeItems []int) {
-	newTree := &BinaryTree{}
+	treeItems := OrderSliceAndRemoveDuplicates(items)
 
 	pivotPosition := GetPivotPosition(treeItems)
 
-	newTree.Root.Value = treeItems[pivotPosition]
-	setBinaryTreeNodesFromSlice(&newTree.Root, getLeftNodeSlice, treeItems)
-	setBinaryTreeNodesFromSlice(&newTree.Root, getRightNodeSlice, treeItems)
+	binaryTree.Root.LeftNode = getTreeNode(treeItems, pivotPosition, getLeftNodeItems)
+	binaryTree.Root.RightNode = getTreeNode(treeItems, pivotPosition, getRightNodeItems)
+
+	binaryTree.Root.Value = treeItems[pivotPosition]
+
+	return binaryTree
 }
 
 func GetPivotPosition(slice []int) int {
@@ -27,24 +54,42 @@ func GetPivotPosition(slice []int) int {
 	return int(pivotPosition)
 }
 
-func setBinaryTreeNodesFromSlice(node *Node, nodeBranchFunction NodeBranchFunction, treeItems []int) {
-	nodePivotPosition := GetPivotPosition(treeItems)
-	nodeItems := nodeBranchFunction(treeItems, nodePivotPosition)
+func getTreeNode(parentItems []int, parentPivotPosition int, getNodeItemsFunc NodeItemsFunc) *Node {
+	node := &Node{}
 
-	if len(nodeItems) > 0 {
-		node.LeftNode.Value = nodeItems[nodePivotPosition]
+	nodeItems := getNodeItemsFunc(parentItems, parentPivotPosition)
+	nodePivotPosition := GetPivotPosition(nodeItems)
+
+	node.Value = nodeItems[nodePivotPosition]
+
+	if hasChildNode(nodeItems, LEFT_NODE) {
+		node.LeftNode = getTreeNode(nodeItems, nodePivotPosition, getLeftNodeItems)
 	}
 
-	if nodePivotPosition > 0 {
-		setBinaryTreeNodesFromSlice(node, nodeBranchFunction, nodeItems)
+	if hasChildNode(nodeItems, RIGHT_NODE) {
+		node.RightNode = getTreeNode(nodeItems, nodePivotPosition, getRightNodeItems)
 	}
 
+	return node
 }
 
-func getLeftNodeSlice(treeItems []int, pivotPosition int) []int {
+func getLeftNodeItems(treeItems []int, pivotPosition int) []int {
 	return treeItems[:pivotPosition]
 }
 
-func getRightNodeSlice(treeItems []int, pivotPosition int) []int {
+func getRightNodeItems(treeItems []int, pivotPosition int) []int {
 	return treeItems[pivotPosition+1:]
+}
+
+func hasChildNode(nodeItems []int, nodeType NodeType) bool {
+
+	if nodeType == LEFT_NODE {
+		return len(nodeItems) > 1
+	}
+
+	if nodeType == RIGHT_NODE {
+		return len(nodeItems) > 2
+	}
+
+	return false
 }

@@ -7,7 +7,7 @@ import (
 
 func TestMain(t *testing.T) {
 
-	a := []int{1, 2}
+	a := []int{1, 2, 3, 4, 5, 6}
 	pivot := int(len(a) / 2)
 	fmt.Println(pivot)
 
