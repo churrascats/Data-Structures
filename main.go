@@ -16,9 +16,9 @@ func main() {
 
 	binaryTree := tree.NewBinaryTree(orderedAndNoDuplicatesSlice)
 
-	//printBinaryTree(binaryTree)
+	//PrintBinaryTree(binaryTree)
 
-	isFound := binaryTree.Search(11)
+	isFound := binaryTree.Search(38)
 
 	if isFound {
 		fmt.Println("Found")
